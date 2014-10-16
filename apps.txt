@@ -1,0 +1,9 @@
+google:	
+wiki:	
+def:	
+syn:	
+youtube:	
+chromium	chromium
+gvim	gvim
+thunar	thunar
+
