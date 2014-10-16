@@ -27,51 +27,43 @@
 #	 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-
 use strict;
 
 use Tk;
 
 my $colour = "black";    #default colour value
+my $thewidth = 300;
+my $theheight = 700;
+
+
 my @matches;
 
 my $mw = new MainWindow( -background=>$colour );
-$mw->geometry( "1050x840" );
+$mw->geometry($thewidth . "x" . $theheight);
 my $usrentry;
 my @commands;
 my @names;
 
-	my ($sec,$min,$hour,$mday,$mon,$yyear,$wday,$yday,$isdst) =  localtime(time);
-	my $yyyear = $yyear + 1900;
-	my @abbr = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
-
 $mw->title('Starlight Application Launcher');
 $mw->bind("<Key-Return>", \&enterpressed );
 $mw->bind("<Key>", \&update );
+
+# find center
 my $sw = $mw->screenwidth;
 my $sh = $mw->screenheight;
-my $awplace = $sw/2-1050/2;		##########
-my $ahplace = $sh/2-840/2;		##########
-$mw->MoveToplevelWindow ($awplace,$ahplace);
+my $awplace = $sw/2-$thewidth/2;
+my $ahplace = $sh/2-$theheight/2;
+# $mw->MoveToplevelWindow ($awplace,$ahplace);
 
+# place the window
+$mw->MoveToplevelWindow (40, 40);
 
 $mw->focus();
 
 my $label = $mw->Label( -background=>$colour, -foreground=>'white', -text=>"STARLIGHT" );
-my $time; my $time2;
-if( $hour > 12 ){ $time = $hour-12; }
-else{ $time = $hour; }
-if( $min < 10 ){ $time2 = "0"."$min"; }
-else{ $time2 = $min;; }
-my $lastlabel = $mw->Label( -background=>$colour, -foreground=>'red', -text=>"$abbr[$mon] $mday, $yyyear    $time:$time2" );
 my $penlabel = $mw->Label( -background=>$colour, -foreground=>'white', -text=>"" );
 
-
-
-my $label5 = $mw->Label( -background=>$colour, -foreground=>'white', -text=>"       notes:                                                                                                                            reminders:" );
-my $label10 = $mw->Label( -background=>"black", -foreground=>'black', -text=>" " );
-
-my $entry = $mw->Entry( -textvariable=>\$usrentry, -background=>"yellow", -foreground=>"black" );
+my $entry = $mw->Entry( -textvariable=>\$usrentry, -background=>"grey21", -foreground=>"white" );
 
 
 open( my $fh, "/home/tony/applaunch/apps.txt" ) or die "$!";
@@ -92,104 +84,45 @@ my $label9 = $mw->Label( -background=>$colour, -foreground=>'white', -text=>"" )
 
 my @copy = @names;
 
-my $lb2 = $mw->Text( -foreground=>"yellow", -background=>"black", -wrap=>"word", 
-		-borderwidth=>0, -font=>[-weight=>'bold', -size=>'6', -family=>'Arial'], -width=>85, -height=>5 );
+my $lb2 = $mw->Text( -foreground=>"yellow", -background=>"grey21", -wrap=>"word", 
+		-borderwidth=>0, -font=>[-weight=>'bold', -size=>'6', -family=>'Arial'], -width=>30, -height=>40 );
 
 my $frame = $mw->Frame();
-my $frame2 = $frame->Frame();
 
-my $lb3 = $frame2->Scrolled( 'Text',-scrollbars=>"oe", -foreground=>"white", -background=>"black", -wrap=>"word", 
-					-borderwidth=>0, -font=>[-weight=>'bold', -size=>'6', -family=>'Arial'], -width=>60, -height=>32 );
-#my $srl_y = $frame2-> Scrollbar(-orient=>'v',-command=>[yview => $lb3]);
-
-					
-my $lb4 = $mw->Scrolled( 'Text',-scrollbars=>"oe", -foreground=>"white", -background=>"black", -wrap=>"word", 
-					-borderwidth=>0, -font=>[-weight=>'bold', -size=>'6', -family=>'Arial'], -width=>60, -height=>32 );
-
-
-
-my $lb6 = $mw->Text( -foreground=>"purple", -background=>"black", -wrap=>"word", 
-		-borderwidth=>0, -font=>[-weight=>'bold', -size=>'6', -family=>'Arial'], -width=>110, -height=>2 );
-
-my $results = `ps aux`;
-my @res = split '\n', $results;
-my @list = ();
-$lb6->insert( 'end', "OPEN APPLICATIONS:   " );
-foreach( @res ){
-        my @line = split /\s+/, $_;
-        my $lin = $line[10];
-        if( $lin !~ /\[/ and $lin !~ /^\/usr/ and $lin !~ /^\/+s*bin/ and
-           $lin !~ /daemon|bash|sh|^python$|trackerd|nm-applet|run-parts|sleep|COMMAND|nautilus|gnome-pty-helper|hald|ps|gnome-panel|x-session-manager|applet|gnome-power-manager|gnome-screensaver|update-notifier/ ){
-                if( $lin =~ /songbird/ ){ $lin = "songbird";; }
-                else{   push @list, $lin; }
-                print "$lin\n";			$lb6->insert( 'end', " $lin   " );
-        }
-}
-
-
-my $bigstring = " ";
+my $bigstring = "";
 
 for( my $scrubs = 0; $scrubs <= $#copy; $scrubs++ ){
 	$bigstring.=$copy[$scrubs];
-	$bigstring.="  ";
+	$bigstring.="\n";
 }
 $lb2->insert( "end", $bigstring );
 $lb2->configure( -state=>"disabled" );
 
-chdir( );
-open my $H, "<NOTES";
-while( <$H> ){
-	$lb3->insert( 'end', " * $_\n" );
-}
-
-
-
-lezg:
-$lb4->delete( "1.0", "end" );
-open my $H, "<REMS";
-my @allentries = <$H>;
-@allentries = sort{ $a <=> $b } @allentries;
-my $counter = 0;
-foreach( @allentries ){
-	$counter++;
-	my $enterthewutang = $_;
-	print "\n!!!!!!!!!!$enterthewutang!!!!!!!!\n";
-	my $m = 0;
-	my $d = 0;
-	my $y = 0;
-	$enterthewutang =~ /^(\w+)\/(\w+)\/(\w{4})/;
-	print "\n<><>$1<><>$2<><>$3<><>\n";
-	my $addto = processREM2( $1, $2, $3, " " );;
-	if( $counter != 1 and $addto >= 0){ $lb4->insert( 'end', "$addto DAYS LEFT!\n\t$_\n" ); }
-}
-
-
-
-
-$lb2->configure( -font=>[-weight=>'bold', -size=>'6', -family=>'Arial'] );
-
+# choices
+$lb2->configure( -font=>[-weight=>'bold', -size=>'8', -family=>'Arial'] );
 $lb2->tagConfigure('STRG',  -foreground => "green", -font=>[-weight=>'bold', -size=>'12', -family=>'Courier']);
 $lb2->tagConfigure('STRG2', -foreground => "red", -font=>[-weight=>'bold', -size=>'12', -family=>'Courier']);
 
 
 $entry->focus();
 
-$penlabel->grid();
-#$lastlabel->grid( );
-$lb2->grid( );
-$label2->grid( );
 $label->grid( );
 $entry->grid( );;
-$label3->grid();
-$lastlabel->grid();
-$label10->grid();
-$label5->grid( );
-$frame2->grid( );
+$penlabel->grid();
+$lb2->grid( );
+$label2->grid( );
+#$label3->grid();
+
+
+#$lastlabel->grid();
+#$label10->grid();
+#$label5->grid( );
+#$frame2->grid( );
 #$lb3->grid( $srl_y, $lb4 );
-$lb3->grid( $lb4 );
-$frame->grid();
-$label9->grid();
-$lb6->grid();
+#$lb3->grid( $lb4 );
+#$frame->grid();
+#$label9->grid();
+# $lb6->grid();
 
 MainLoop;
 
@@ -203,13 +136,16 @@ sub enterpressed{
 	my $usrentry = update();							
 	
 	if( $usrentry eq "leavemebreathless" ){ return; }
+
+    print "reww";
 	
 	#If nothing there
 	if( $usrentry eq "" ){ exit; }
 	
 	#if overriden command forced
 	if( $usrentry =~ m/^:/ ){
-		my $custom = (split ":", $usrentry)[1];
+		my $custom = (split ":", $usrentry)[1];	
+
 		exec "$custom";
 	}
 
@@ -261,7 +197,7 @@ sub enterpressed{
 		exec "chromium --new-window http://dictionary.reference.com/browse/$searchtokens";
 	}
 
-	#thesaurus
+	#thesauruprint "$actual\n";s
 	if( $usrentry =~ m/^syn:/ ){
 		my $searchtokens = (split "syn:", $usrentry)[1];    #print "<>$searchtokens<>\n";
 		$searchtokens =~ s/^\s//;$searchtokens =~s/^ //;	#print "<><>$searchtokens<><>\n";
@@ -313,12 +249,11 @@ sub update{
 	@matches = ();
 	$lb2->tagRemove( "STRG",  '1.0', 'end');
 	$lb2->tagRemove( "STRG2", '1.0', 'end');
-	$lb2->configure( -background=>"black" );
 	my $line;
-	foreach my $ln(1 .. 5) {
-		$line .= $lb2->get($ln.'.0', $ln.'.end');
+	foreach my $ln(1 .. 100) {
+		$line .= " " . $lb2->get($ln.'.0', $ln.'.end');
 	}
-
+		
 	my $adult = 0;
 	my $mat = "";
 	my $actual = $usrentry;
@@ -326,34 +261,43 @@ sub update{
 	if( $usrentry =~ /:/ ){ $usrcopy = (split ":", $usrentry)[0]; $usrcopy .= ":";   }
 	else{ $usrcopy = $usrentry; }
 	while ( $line =~ /\s+($usrcopy\S*)/g ) {
+        print "\n<>$1<>\n";
 		$mat = $1;
 		$adult++;
 		if( $actual ne "" ){ push @matches, $mat; }
 	}
-	
-    foreach my $ln( 1 .. 4 ){
+    print "\nthe matches:";
+    print "@matches\n";
+
+    # this is where the problem is
+    foreach my $ln( 1 .. 100 ){
        my $line = $lb2->get($ln.'.0', $ln.'.end');
+       print "@matches";
        foreach my $el ( @matches ){
-       	   while ( $line =~ /\s+($usrcopy\S*)/g ) {
+       	   while ( $line =~ /^$usrcopy/g ) {
        	   			if( @matches == 1 ){ 
-        	        	$lb2->tagAdd('STRG2', $ln.'.'.(pos($line)-length($1)), $ln.'.'.pos($line));
-        	        	#$lb2->configure( -background=>"blue" );
+                        print "try to add strg2\n";
+        	        	$lb2->tagAdd('STRG2', $ln.'.0', $ln.'.end');
 					}
 					else{
-						$lb2->tagAdd( 'STRG', $ln.'.'.(pos($line)-length($1)), $ln.'.'.pos($line));
+                        print "try to add strg\n";
+						$lb2->tagAdd( 'STRG', $ln.'.0', $ln.'.end');
 					}
             }
        }
    }
-	
+   print "ntrew";	
 	if( $adult == 1 ){
+        print "adult\n";
 		if( $mat =~ /torrent:/ or $mat =~ /google:/ or $mat =~ /wiki:/ or $mat =~ /def:/ or $mat =~ /syn:/ or $mat =~ /youtube:/ ){
+            print "actual\n";
 			return $actual;
 		}
-		
+        print "mat\n";
 		return $mat;	
 	}
 	if( $actual =~ /^:/ ){ return $actual; }
+    print "breatless\n";
 	return "leavemebreathless";
 }
 
