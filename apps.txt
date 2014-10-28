@@ -6,4 +6,5 @@ youtube:
 chromium	chromium
 gvim	gvim
 thunar	thunar
+terminal	x-terminal-emulator
 
